@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.wdf.sap.corp/I061150/aker/adapter"
 	"github.wdf.sap.corp/I061150/aker/api"
 	"github.wdf.sap.corp/I061150/aker/plugin"
 )
@@ -74,52 +75,15 @@ func singleJoiningSlash(a, b string) string {
 }
 
 func (p *plug) Process(context api.Context) bool {
-	p.log.Info("Process...")
-
 	if p.handler == nil {
 		p.log.Error("Plugin has not been configured!")
 		os.Exit(1)
 	}
 
-	req := &http.Request{
-		URL:    context.Request.URL(),
-		Method: context.Request.Method(),
-		Body:   context.Request,
-	}
-	resp := &responseWrapper{
-		delegate: context.Response,
-	}
+	req := adapter.NewRequest(context.Request)
+	resp := adapter.NewResponseWriterAdapter(context.Response)
 	p.handler.ServeHTTP(resp, req)
-	resp.Close()
+	resp.Flush()
 
-	p.log.Info("Done!")
 	return true
-}
-
-type responseWrapper struct {
-	delegate      api.Response
-	headers       http.Header
-	headerWritten bool
-}
-
-func (w *responseWrapper) Header() http.Header {
-	return w.headers
-}
-
-func (w *responseWrapper) WriteHeader(status int) {
-	for name, value := range w.headers {
-		w.delegate.SetHeader(name, value)
-	}
-	w.delegate.WriteStatus(status)
-	w.headerWritten = true
-}
-
-func (w *responseWrapper) Write(data []byte) (int, error) {
-	return w.delegate.Write(data)
-}
-
-func (w *responseWrapper) Close() {
-	if !w.headerWritten {
-		w.WriteHeader(http.StatusOK)
-	}
 }
