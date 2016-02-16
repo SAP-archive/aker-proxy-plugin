@@ -11,17 +11,13 @@ import (
 
 	"github.wdf.sap.corp/I061150/aker/adapter"
 	"github.wdf.sap.corp/I061150/aker/api"
-	"github.wdf.sap.corp/I061150/aker/plugin"
 )
 
-func NewPlugin(log plugin.Logger) api.Plugin {
-	return &plug{
-		log: log,
-	}
+func NewPlugin() api.Plugin {
+	return &plug{}
 }
 
 type plug struct {
-	log       plugin.Logger
 	target    *url.URL
 	proxyPath string
 	handler   http.Handler
@@ -33,7 +29,7 @@ type pluginConfig struct {
 }
 
 func (p *plug) Config(data []byte) error {
-	p.log.Info(fmt.Sprintf("Configuration: %s", string(data)))
+	fmt.Printf("INFO: Configuration: %s\n", string(data))
 	cfg := pluginConfig{}
 	err := json.Unmarshal(data, &cfg)
 	if err != nil {
@@ -76,7 +72,7 @@ func singleJoiningSlash(a, b string) string {
 
 func (p *plug) Process(context api.Context) bool {
 	if p.handler == nil {
-		p.log.Error("Plugin has not been configured!")
+		fmt.Println("ERROR: Plugin has not been configured!")
 		os.Exit(1)
 	}
 

@@ -6,11 +6,6 @@ import (
 )
 
 func main() {
-	log, err := plugin.NewLogger("aker-proxy")
-	if err != nil {
-		panic(err)
-	}
-
-	p := core.NewPlugin(log)
+	p := core.NewPlugin()
 	plugin.ListenAndServe(p)
 }
