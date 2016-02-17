@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	plugin.ListenAndServe("aker-proxy", func() (api.Plugin, error) {
+	plugin.ListenAndServe(func() (api.Plugin, error) {
 		return core.NewPlugin(), nil
 	})
 }
