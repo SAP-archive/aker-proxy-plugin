@@ -3,10 +3,10 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.wdf.sap.corp/I061150/aker/adapter"
@@ -29,7 +29,7 @@ type pluginConfig struct {
 }
 
 func (p *plug) Config(data []byte) error {
-	fmt.Printf("INFO: Configuration: %s\n", string(data))
+	fmt.Printf("Configuration: %s\n", string(data))
 	cfg := pluginConfig{}
 	err := json.Unmarshal(data, &cfg)
 	if err != nil {
@@ -72,8 +72,7 @@ func singleJoiningSlash(a, b string) string {
 
 func (p *plug) Process(context api.Context) bool {
 	if p.handler == nil {
-		fmt.Println("ERROR: Plugin has not been configured!")
-		os.Exit(1)
+		log.Fatalln("Plugin has not been configured!")
 	}
 
 	req := adapter.NewRequest(context.Request)
