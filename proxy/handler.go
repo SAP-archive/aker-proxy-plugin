@@ -1,23 +1,25 @@
 package proxy
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+
+	"github.wdf.sap.corp/I061150/aker/logging"
+
+	"github.com/cloudfoundry-incubator/candiedyaml"
 )
 
 type handlerConfig struct {
-	URL       string `json:"url"`
-	ProxyPath string `json:"proxy_path"`
+	URL       string `yaml:"url"`
+	ProxyPath string `yaml:"proxy_path"`
 }
 
 func NewHandler(config []byte) (http.Handler, error) {
-	fmt.Printf("Configuration: %s\n", string(config))
+	logging.Infof("Configuration: %s", string(config))
 	cfg := handlerConfig{}
-	if err := json.Unmarshal(config, &cfg); err != nil {
+	if err := candiedyaml.Unmarshal(config, &cfg); err != nil {
 		return nil, err
 	}
 
@@ -31,25 +33,25 @@ func NewHandler(config []byte) (http.Handler, error) {
 			req.Host = targetURL.Host
 			req.URL.Scheme = targetURL.Scheme
 			req.URL.Host = targetURL.Host
-			req.URL.Path = removeLeadingPath(req.URL.Path, cfg.ProxyPath)
-			req.URL.Path = singleJoiningSlash(targetURL.Path, req.URL.Path)
+			originalPath := removeProxyPath(req.URL.Path, cfg.ProxyPath)
+			req.URL.Path = joinPaths(targetURL.Path, originalPath)
 		},
 	}, nil
 }
 
-func removeLeadingPath(path, leading string) string {
-	leading = strings.TrimRight(leading, "/")
-	return path[len(leading):]
+func removeProxyPath(path, proxyPath string) string {
+	return strings.TrimPrefix(path, proxyPath)
 }
 
-func singleJoiningSlash(a, b string) string {
-	aslash := strings.HasSuffix(a, "/")
-	bslash := strings.HasPrefix(b, "/")
+func joinPaths(first, second string) string {
+	firstSlash := strings.HasSuffix(first, "/")
+	secondSlash := strings.HasPrefix(second, "/")
 	switch {
-	case aslash && bslash:
-		return a + b[1:]
-	case !aslash && !bslash:
-		return a + "/" + b
+	case firstSlash && secondSlash:
+		return first + second[1:]
+	case !firstSlash && !secondSlash:
+		return first + "/" + second
+	default:
+		return first + second
 	}
-	return a + b
 }
