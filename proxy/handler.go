@@ -6,8 +6,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.wdf.sap.corp/I061150/aker/logging"
-
 	"github.com/cloudfoundry-incubator/candiedyaml"
 )
 
@@ -17,7 +15,6 @@ type handlerConfig struct {
 }
 
 func NewHandler(config []byte) (http.Handler, error) {
-	logging.Infof("Configuration: %s", string(config))
 	cfg := handlerConfig{}
 	if err := candiedyaml.Unmarshal(config, &cfg); err != nil {
 		return nil, err
