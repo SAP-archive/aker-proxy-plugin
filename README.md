@@ -14,16 +14,16 @@ The `url` property specifies the remote endpoint to which requests will be forwa
 
 The `proxy_path` property can be used to remove part of the original request path.
 
-For example, with the following configuration,
+For example, with the following configuration in Aker,
 
 ```yaml
-handlers:
-  path: "/two/segments"
-  filters:
-    - class: reverse_proxy
-      config:
-        url: http://example.org/target
-        proxy_path: "/two"
+endpoints:
+  - path: /two/segments
+    plugins:
+      - ...
+        configuration:
+          url: http://example.org/target
+          proxy_path: "/two"
 ```
 
 if you were to access Aker on `/two/segments/suffix`, the requests would be forwarded to `http://example.org/target/segments/suffix`.
