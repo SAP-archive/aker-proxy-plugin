@@ -1,0 +1,39 @@
+{
+	"ImportPath": "github.wdf.sap.corp/I061150/aker-proxy",
+	"GoVersion": "go1.6",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/cloudfoundry-incubator/candiedyaml",
+			"Rev": "55a459c2d9da2b078f0725e5fb324823b2c71702"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "02ac84f19cf2febf53ac06e7fbc446c1ea0258e3"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.2.0-25-ga06d064",
+			"Rev": "a06d064ed0aadd8eb066e2752b22eaafa76fdbef"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-71-g2152b45",
+			"Rev": "2152b45fa28a361beba9aab0885972323a444e28"
+		},
+		{
+			"ImportPath": "github.wdf.sap.corp/I061150/aker/logging",
+			"Rev": "96c926999394486c09e14f3b2476a24c8ceaf92c"
+		},
+		{
+			"ImportPath": "github.wdf.sap.corp/I061150/aker/plugin",
+			"Rev": "96c926999394486c09e14f3b2476a24c8ceaf92c"
+		},
+		{
+			"ImportPath": "github.wdf.sap.corp/I061150/aker/socket",
+			"Rev": "96c926999394486c09e14f3b2476a24c8ceaf92c"
+		}
+	]
+}
