@@ -1,0 +1,8 @@
+---
+platform: linux
+
+image: docker:///golang#1.6
+inputs:
+  - name: aker-proxy
+run:
+    path: aker-proxy/concourse/ginkgo-tests.sh
