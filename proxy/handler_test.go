@@ -13,14 +13,18 @@ import (
 )
 
 var _ = Describe("Handler", func() {
+	const headerKey = "X-Aker-Custom-Header"
+	const headerValue = "SomeValue"
+
 	var targetURL string
 	var proxyPath string
+	var preserveHeaders bool
 	var handler http.Handler
 
 	JustBeforeEach(func() {
 		parsedTargetURL, err := url.Parse(targetURL)
 		Ω(err).ShouldNot(HaveOccurred())
-		handler = NewHandler(parsedTargetURL, proxyPath)
+		handler = NewHandler(parsedTargetURL, proxyPath, preserveHeaders)
 		Ω(handler).ShouldNot(BeNil())
 	})
 
@@ -49,6 +53,7 @@ var _ = Describe("Handler", func() {
 			response = httptest.NewRecorder()
 			var err error
 			request, err = http.NewRequest("GET", "http://example.com/first/second?q=1", nil)
+			request.Header.Add(headerKey, headerValue)
 			Ω(err).ShouldNot(HaveOccurred())
 		})
 
@@ -58,6 +63,40 @@ var _ = Describe("Handler", func() {
 
 		JustBeforeEach(func() {
 			handler.ServeHTTP(response, request)
+		})
+
+		Context("when internal headers are not preserved", func() {
+			BeforeEach(func() {
+				preserveHeaders = false
+				targetURL = fakeServer.URL()
+				proxyPath = ""
+				fakeServer.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/first/second", "q=1"),
+					ghttp.VerifyHeader(http.Header{
+						headerKey: nil,
+					}),
+					ghttp.RespondWith(http.StatusOK, serverResponsePayload),
+				))
+			})
+
+			itShouldCallTheServer()
+		})
+
+		Context("when internal headers are preserved", func() {
+			BeforeEach(func() {
+				preserveHeaders = true
+				targetURL = fakeServer.URL()
+				proxyPath = ""
+				fakeServer.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/first/second", "q=1"),
+					ghttp.VerifyHeader(http.Header{
+						headerKey: []string{headerValue},
+					}),
+					ghttp.RespondWith(http.StatusOK, serverResponsePayload),
+				))
+			})
+
+			itShouldCallTheServer()
 		})
 
 		Context("when both target path and proxy path are empty", func() {

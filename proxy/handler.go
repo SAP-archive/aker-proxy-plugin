@@ -10,8 +10,9 @@ import (
 )
 
 type handlerConfig struct {
-	URL       string `yaml:"url"`
-	ProxyPath string `yaml:"proxy_path"`
+	URL                     string `yaml:"url"`
+	ProxyPath               string `yaml:"proxy_path"`
+	PreserveInternalHeaders bool   `yaml:"preserve_internal_headers"`
 }
 
 func NewHandlerFromRawConfig(config []byte) (http.Handler, error) {
@@ -27,10 +28,10 @@ func NewHandlerFromConfig(cfg handlerConfig) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewHandler(targetURL, cfg.ProxyPath), nil
+	return NewHandler(targetURL, cfg.ProxyPath, cfg.PreserveInternalHeaders), nil
 }
 
-func NewHandler(targetURL *url.URL, proxyPath string) http.Handler {
+func NewHandler(targetURL *url.URL, proxyPath string, preserveHeaders bool) http.Handler {
 	return &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
 			req.Host = targetURL.Host
@@ -38,7 +39,18 @@ func NewHandler(targetURL *url.URL, proxyPath string) http.Handler {
 			req.URL.Host = targetURL.Host
 			originalPath := removeProxyPath(req.URL.Path, proxyPath)
 			req.URL.Path = joinPaths(targetURL.Path, originalPath)
+			if !preserveHeaders {
+				removeInternalHeaders(req.Header)
+			}
 		},
+	}
+}
+
+func removeInternalHeaders(headers http.Header) {
+	for name := range headers {
+		if strings.HasPrefix(strings.ToLower(name), "x-aker") {
+			delete(headers, name)
+		}
 	}
 }
 
