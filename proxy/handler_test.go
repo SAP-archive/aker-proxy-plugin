@@ -1,9 +1,9 @@
 package proxy_test
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 
 	. "github.wdf.sap.corp/I061150/aker-proxy/proxy"
 
@@ -13,44 +13,15 @@ import (
 )
 
 var _ = Describe("Handler", func() {
-	var configuration []byte
+	var targetURL string
+	var proxyPath string
 	var handler http.Handler
-	var handlerErr error
-
-	buildConfiguration := func(targetURL, proxyPath string) []byte {
-		buffer := bytes.Buffer{}
-		buffer.WriteString("---\n")
-		buffer.WriteString("url: ")
-		buffer.WriteString(targetURL)
-		buffer.WriteString("\n")
-		buffer.WriteString("proxy_path: ")
-		buffer.WriteString(proxyPath)
-		buffer.WriteString("\n")
-		return buffer.Bytes()
-	}
 
 	JustBeforeEach(func() {
-		handler, handlerErr = NewHandler(configuration)
-	})
-
-	Context("when configuration is invalid YAML", func() {
-		BeforeEach(func() {
-			configuration = []byte("&asdINVALID_YAML:^HERE")
-		})
-
-		It("handler creation should fail", func() {
-			Ω(handlerErr).Should(HaveOccurred())
-		})
-	})
-
-	Context("when configuration contains invalid URL", func() {
-		BeforeEach(func() {
-			configuration = buildConfiguration("::INVALID::URL", "/")
-		})
-
-		It("handler creation should fail", func() {
-			Ω(handlerErr).Should(HaveOccurred())
-		})
+		parsedTargetURL, err := url.Parse(targetURL)
+		Ω(err).ShouldNot(HaveOccurred())
+		handler = NewHandler(parsedTargetURL, proxyPath)
+		Ω(handler).ShouldNot(BeNil())
 	})
 
 	Context("when configuration is valid", func() {
@@ -59,13 +30,6 @@ var _ = Describe("Handler", func() {
 		var fakeServer *ghttp.Server
 		var response *httptest.ResponseRecorder
 		var request *http.Request
-
-		itHandlerCreationShouldNotFail := func() {
-			It("handler creation should not fail", func() {
-				Ω(handler).ShouldNot(BeNil())
-				Ω(handlerErr).ShouldNot(HaveOccurred())
-			})
-		}
 
 		itShouldCallTheServer := func() {
 			It("should call the server", func() {
@@ -98,14 +62,13 @@ var _ = Describe("Handler", func() {
 
 		Context("when both target path and proxy path are empty", func() {
 			BeforeEach(func() {
-				configuration = buildConfiguration(fakeServer.URL(), "")
+				targetURL = fakeServer.URL()
+				proxyPath = ""
 				fakeServer.AppendHandlers(ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/first/second", "q=1"),
 					ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 				))
 			})
-
-			itHandlerCreationShouldNotFail()
 
 			itShouldCallTheServer()
 
@@ -114,14 +77,13 @@ var _ = Describe("Handler", func() {
 
 		Context("when the target path is non-empty but proxy path is empty", func() {
 			BeforeEach(func() {
-				configuration = buildConfiguration(fakeServer.URL()+"/zero", "")
+				targetURL = fakeServer.URL() + "/zero"
+				proxyPath = ""
 				fakeServer.AppendHandlers(ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/zero/first/second", "q=1"),
 					ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 				))
 			})
-
-			itHandlerCreationShouldNotFail()
 
 			itShouldCallTheServer()
 
@@ -130,14 +92,13 @@ var _ = Describe("Handler", func() {
 
 		Context("when the proxy path is non-empty", func() {
 			BeforeEach(func() {
-				configuration = buildConfiguration(fakeServer.URL(), "/first")
+				targetURL = fakeServer.URL()
+				proxyPath = "/first"
 				fakeServer.AppendHandlers(ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/second", "q=1"),
 					ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 				))
 			})
-
-			itHandlerCreationShouldNotFail()
 
 			itShouldCallTheServer()
 
@@ -146,14 +107,13 @@ var _ = Describe("Handler", func() {
 
 		Context("when proxy path does not match request path", func() {
 			BeforeEach(func() {
-				configuration = buildConfiguration(fakeServer.URL(), "/notFirst")
+				targetURL = fakeServer.URL()
+				proxyPath = "/notFirst"
 				fakeServer.AppendHandlers(ghttp.CombineHandlers(
 					ghttp.VerifyRequest("GET", "/first/second", "q=1"),
 					ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 				))
 			})
-
-			itHandlerCreationShouldNotFail()
 
 			itShouldCallTheServer()
 
@@ -163,14 +123,13 @@ var _ = Describe("Handler", func() {
 		Context("when both target path and proxy path are non-empty", func() {
 			Context("when target path does not end with slash", func() {
 				BeforeEach(func() {
-					configuration = buildConfiguration(fakeServer.URL()+"/zero", "/first")
+					targetURL = fakeServer.URL() + "/zero"
+					proxyPath = "/first"
 					fakeServer.AppendHandlers(ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/zero/second", "q=1"),
 						ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 					))
 				})
-
-				itHandlerCreationShouldNotFail()
 
 				itShouldCallTheServer()
 
@@ -179,14 +138,13 @@ var _ = Describe("Handler", func() {
 
 			Context("when target path ends with slash", func() {
 				BeforeEach(func() {
-					configuration = buildConfiguration(fakeServer.URL()+"/zero/", "/first")
+					targetURL = fakeServer.URL() + "/zero/"
+					proxyPath = "/first"
 					fakeServer.AppendHandlers(ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/zero/second", "q=1"),
 						ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 					))
 				})
-
-				itHandlerCreationShouldNotFail()
 
 				itShouldCallTheServer()
 
@@ -195,14 +153,13 @@ var _ = Describe("Handler", func() {
 
 			Context("when proxy path is only slash", func() {
 				BeforeEach(func() {
-					configuration = buildConfiguration(fakeServer.URL()+"/zero", "/")
+					targetURL = fakeServer.URL() + "/zero"
+					proxyPath = "/"
 					fakeServer.AppendHandlers(ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/zero/first/second", "q=1"),
 						ghttp.RespondWith(http.StatusOK, serverResponsePayload),
 					))
 				})
-
-				itHandlerCreationShouldNotFail()
 
 				itShouldCallTheServer()
 

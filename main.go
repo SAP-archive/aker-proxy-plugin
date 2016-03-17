@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	plugin.ListenAndServe(proxy.NewHandler)
+	plugin.ListenAndServe(proxy.NewHandlerFromRawConfig)
 }

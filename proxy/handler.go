@@ -14,26 +14,32 @@ type handlerConfig struct {
 	ProxyPath string `yaml:"proxy_path"`
 }
 
-func NewHandler(config []byte) (http.Handler, error) {
+func NewHandlerFromRawConfig(config []byte) (http.Handler, error) {
 	cfg := handlerConfig{}
 	if err := candiedyaml.Unmarshal(config, &cfg); err != nil {
 		return nil, err
 	}
+	return NewHandlerFromConfig(cfg)
+}
 
+func NewHandlerFromConfig(cfg handlerConfig) (http.Handler, error) {
 	targetURL, err := url.Parse(cfg.URL)
 	if err != nil {
 		return nil, err
 	}
+	return NewHandler(targetURL, cfg.ProxyPath), nil
+}
 
+func NewHandler(targetURL *url.URL, proxyPath string) http.Handler {
 	return &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
 			req.Host = targetURL.Host
 			req.URL.Scheme = targetURL.Scheme
 			req.URL.Host = targetURL.Host
-			originalPath := removeProxyPath(req.URL.Path, cfg.ProxyPath)
+			originalPath := removeProxyPath(req.URL.Path, proxyPath)
 			req.URL.Path = joinPaths(targetURL.Path, originalPath)
 		},
-	}, nil
+	}
 }
 
 func removeProxyPath(path, proxyPath string) string {
