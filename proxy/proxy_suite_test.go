@@ -3,7 +3,7 @@ package proxy_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.wdf.sap.corp/I061150/aker/logging"
+	"github.infra.hana.ondemand.com/I061150/aker/logging"
 
 	"testing"
 )

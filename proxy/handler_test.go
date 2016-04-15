@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 
-	. "github.wdf.sap.corp/I061150/aker-proxy/proxy"
+	. "github.infra.hana.ondemand.com/I061150/aker-proxy/proxy"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
