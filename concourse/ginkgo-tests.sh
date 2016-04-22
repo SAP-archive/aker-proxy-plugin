@@ -4,13 +4,11 @@ set -e
 
 mkdir -p $GOPATH/src
 
-echo "Relocating vendored packages..."
-mv aker-proxy/vendor/* $GOPATH/src
-
-echo "Relocating project..."
-mkdir -p $GOPATH/src/github.infra.hana.ondemand.com/I061150
-cp -r aker-proxy $GOPATH/src/github.infra.hana.ondemand.com/I061150
-cd $GOPATH/src/github.infra.hana.ondemand.com/I061150/aker-proxy
+echo "Moving project to GOPATH..."
+prefix_path=$GOPATH/src/github.infra.hana.ondemand.com/I061150
+mkdir -p $prefix_path
+cp -r aker-proxy $prefix_path
+cd $prefix_path/aker-proxy
 
 echo "Fetching test tools..."
 go get github.com/onsi/ginkgo/ginkgo
