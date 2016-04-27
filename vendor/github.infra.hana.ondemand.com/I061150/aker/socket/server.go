@@ -20,11 +20,12 @@ func ListenAndServe(path string, handler http.Handler) error {
 	return server.Serve(listener)
 }
 
-func GetUniqueSocketPath(prefix string) string {
+func GetUniqueSocketPath(prefix string) (string, error) {
 	tmpFile, err := ioutil.TempFile("", prefix)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	defer os.Remove(tmpFile.Name())
-	return tmpFile.Name()
+	defer tmpFile.Close()
+	return tmpFile.Name(), nil
 }
