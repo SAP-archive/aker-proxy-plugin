@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cloudfoundry-incubator/candiedyaml"
+	"github.infra.hana.ondemand.com/cloudfoundry/aker/plugin"
 )
 
 type handlerConfig struct {
@@ -17,7 +17,7 @@ type handlerConfig struct {
 
 func NewHandlerFromRawConfig(config []byte) (http.Handler, error) {
 	cfg := handlerConfig{}
-	if err := candiedyaml.Unmarshal(config, &cfg); err != nil {
+	if err := plugin.UnmarshalConfig(config, &cfg); err != nil {
 		return nil, err
 	}
 	return NewHandlerFromConfig(cfg)

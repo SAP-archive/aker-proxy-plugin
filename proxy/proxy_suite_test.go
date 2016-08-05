@@ -3,13 +3,13 @@ package proxy_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.infra.hana.ondemand.com/I061150/aker/logging"
+	"github.infra.hana.ondemand.com/cloudfoundry/aker/logging"
 
 	"testing"
 )
 
 func TestProxy(t *testing.T) {
-	logging.DefaultLogger = new(logging.MutedLogger)
+	logging.DefaultLogger = logging.NewNativeLogger(GinkgoWriter, GinkgoWriter)
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Proxy Suite")
