@@ -7,8 +7,8 @@ mkdir -p $GOPATH/src
 echo "Moving project to GOPATH..."
 prefix_path=$GOPATH/src/github.infra.hana.ondemand.com/cloudfoundry
 mkdir -p $prefix_path
-cp -r aker-proxy $prefix_path
-cd $prefix_path/aker-proxy
+cp -r aker-proxy-plugin $prefix_path
+cd $prefix_path/aker-proxy-plugin
 
 echo "Fetching test tools..."
 go get github.com/onsi/ginkgo/ginkgo
