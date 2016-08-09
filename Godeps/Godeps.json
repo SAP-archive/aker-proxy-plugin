@@ -151,16 +151,16 @@
 			"Rev": "c73e51675ad2455a4515b6213eb7145eaade4824"
 		},
 		{
-			"ImportPath": "github.infra.hana.ondemand.com/cloudfoundry/aker/logging",
-			"Rev": "2cec283837a46ba7c937d5d066013acb6650641e"
-		},
-		{
 			"ImportPath": "github.infra.hana.ondemand.com/cloudfoundry/aker/plugin",
-			"Rev": "2cec283837a46ba7c937d5d066013acb6650641e"
+			"Rev": "b1e6e82fd4f725dbfef3caa2c557636360906ece"
 		},
 		{
 			"ImportPath": "github.infra.hana.ondemand.com/cloudfoundry/aker/socket",
-			"Rev": "2cec283837a46ba7c937d5d066013acb6650641e"
+			"Rev": "b1e6e82fd4f725dbfef3caa2c557636360906ece"
+		},
+		{
+			"ImportPath": "github.infra.hana.ondemand.com/cloudfoundry/gologger",
+			"Rev": "5c1c53373ac4e9bf892cea475c1c5fa8b995f3a4"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",

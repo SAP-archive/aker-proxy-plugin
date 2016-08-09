@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.infra.hana.ondemand.com/cloudfoundry/aker-proxy-plugin/proxy"
-	"github.infra.hana.ondemand.com/cloudfoundry/aker/logging"
 	"github.infra.hana.ondemand.com/cloudfoundry/aker/plugin"
+	"github.infra.hana.ondemand.com/cloudfoundry/gologger"
 )
 
 func main() {
 	if err := plugin.ListenAndServeHTTP(proxy.NewHandlerFromRawConfig); err != nil {
-		logging.Fatalf("Error creating plugin: %v", err)
+		gologger.Fatalf("Error creating plugin: %v", err)
 	}
 }
