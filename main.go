@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.infra.hana.ondemand.com/cloudfoundry/aker-proxy-plugin/proxy"
-	"github.infra.hana.ondemand.com/cloudfoundry/aker/plugin"
-	"github.infra.hana.ondemand.com/cloudfoundry/gologger"
+	"github.com/SAP/aker-proxy-plugin/proxy"
+	"github.com/SAP/aker/plugin"
+	"github.com/SAP/gologger"
 )
 
 func main() {

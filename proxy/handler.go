@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.infra.hana.ondemand.com/cloudfoundry/aker/plugin"
+	"github.com/SAP/aker/plugin"
 )
 
 type handlerConfig struct {
