@@ -36,3 +36,11 @@ endpoints:
 ```
 
 if you were to access Aker on `/two/segments/suffix`, the requests would be forwarded to `http://example.org/target/segments/suffix`.
+
+## Tests
+
+`aker-proxy-plugin` project contains unit tests, in order to execute them run the following command in project root directory.
+
+```bash
+ginkgo -r
+```
