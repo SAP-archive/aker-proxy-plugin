@@ -3,6 +3,11 @@ Aker Proxy Plugin
 
 The Aker proxy plugin forwards requests to a remote server. This plugin consumes the request and will be the last in the chain of plugins for a given path.
 
+# License
+This project is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file.
+
+# User Guide
+
 Following is an example of a valid configuration for this plugin.
 
 ```yaml
