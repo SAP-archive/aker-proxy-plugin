@@ -3,7 +3,9 @@ package proxy_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/http/httputil"
 	"net/url"
+	"time"
 
 	. "github.com/SAP/aker-proxy-plugin/proxy"
 
@@ -13,27 +15,63 @@ import (
 )
 
 var _ = Describe("Handler", func() {
-	const headerKey = "X-Aker-Custom-Header"
-	const headerValue = "SomeValue"
+	Context("when creating instances", func() {
+		var config []byte
+		Context("from valid configuration", func() {
+			var proxyHandler *httputil.ReverseProxy
 
-	var targetURL string
-	var proxyPath string
-	var preserveHeaders bool
-	var handler http.Handler
+			itShouldCreateValidProxyHandlerFromRawConfig := func() {
+				handler, err := NewHandlerFromRawConfig(config)
+				Ω(err).ShouldNot(HaveOccurred())
+				Ω(handler).ShouldNot(BeNil())
+				proxyHandler = handler.(*httputil.ReverseProxy)
+			}
 
-	JustBeforeEach(func() {
-		parsedTargetURL, err := url.Parse(targetURL)
-		Ω(err).ShouldNot(HaveOccurred())
-		handler = NewHandler(parsedTargetURL, proxyPath, preserveHeaders)
-		Ω(handler).ShouldNot(BeNil())
+			It("should be able to parse flush interval", func() {
+				config = []byte("flush_interval: 300ms")
+				itShouldCreateValidProxyHandlerFromRawConfig()
+				Ω(proxyHandler.FlushInterval).Should(Equal(300 * time.Millisecond))
+			})
+
+			It("should default to 0 when flush interval not specified", func() {
+				config = []byte("url: http://localhost:8080/")
+				itShouldCreateValidProxyHandlerFromRawConfig()
+				Ω(proxyHandler.FlushInterval).Should(Equal(time.Duration(0)))
+			})
+		})
+
+		Context("from invalid configuration", func() {
+			itShouldFailWhenConfigurationIsInvalid := func() {
+				handler, err := NewHandlerFromRawConfig(config)
+				Ω(err).Should(HaveOccurred())
+				Ω(handler).Should(BeNil())
+			}
+
+			It("should fail", func() {
+				config = []byte("invalid")
+				itShouldFailWhenConfigurationIsInvalid()
+			})
+
+			It("should fail when it's invalid URL", func() {
+				config = []byte("url: http://invalid URL")
+				itShouldFailWhenConfigurationIsInvalid()
+			})
+		})
 	})
 
 	Context("when configuration is valid", func() {
+		const headerKey = "X-Aker-Custom-Header"
+		const headerValue = "SomeValue"
 		const serverResponsePayload = "SomeContent"
 
 		var fakeServer *ghttp.Server
 		var response *httptest.ResponseRecorder
 		var request *http.Request
+		var targetURL string
+		var proxyPath string
+		var preserveHeaders bool
+		var handler http.Handler
+		var flushInterval time.Duration
 
 		itShouldCallTheServer := func() {
 			It("should call the server", func() {
@@ -62,6 +100,10 @@ var _ = Describe("Handler", func() {
 		})
 
 		JustBeforeEach(func() {
+			parsedTargetURL, err := url.Parse(targetURL)
+			Ω(err).ShouldNot(HaveOccurred())
+			handler = NewHandler(parsedTargetURL, proxyPath, preserveHeaders, flushInterval)
+			Ω(handler).ShouldNot(BeNil())
 			handler.ServeHTTP(response, request)
 		})
 

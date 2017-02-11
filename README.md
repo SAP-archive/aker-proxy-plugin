@@ -24,6 +24,8 @@ The `proxy_path` property can be used to remove part of the original request pat
 
 The `preserve_internal_headers` property specifies whether `x-aker-*` headers will be forwarded to the remote target. If the remote resources is hosted by an untrusted provider, then it makes sense to keep this value `false`.
 
+The `flush_interval` property can be used to specify the flush interval to the [ReverseProxy](https://github.com/golang/go/blob/master/src/net/http/httputil/reverseproxy.go). Defaults to `0`.
+
 For example, with the following configuration in Aker,
 
 ```yaml

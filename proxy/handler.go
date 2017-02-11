@@ -5,6 +5,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/SAP/aker/plugin"
 )
@@ -13,6 +14,7 @@ type handlerConfig struct {
 	URL                     string `yaml:"url"`
 	ProxyPath               string `yaml:"proxy_path"`
 	PreserveInternalHeaders bool   `yaml:"preserve_internal_headers"`
+	FlushInterval           string `yaml:"flush_interval"`
 }
 
 func NewHandlerFromRawConfig(config []byte) (http.Handler, error) {
@@ -28,10 +30,11 @@ func NewHandlerFromConfig(cfg handlerConfig) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewHandler(targetURL, cfg.ProxyPath, cfg.PreserveInternalHeaders), nil
+	flushDuration, _ := time.ParseDuration(cfg.FlushInterval)
+	return NewHandler(targetURL, cfg.ProxyPath, cfg.PreserveInternalHeaders, flushDuration), nil
 }
 
-func NewHandler(targetURL *url.URL, proxyPath string, preserveHeaders bool) http.Handler {
+func NewHandler(targetURL *url.URL, proxyPath string, preserveHeaders bool, flushInterval time.Duration) http.Handler {
 	return &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
 			req.Host = targetURL.Host
@@ -43,6 +46,7 @@ func NewHandler(targetURL *url.URL, proxyPath string, preserveHeaders bool) http
 				removeInternalHeaders(req.Header)
 			}
 		},
+		FlushInterval: flushInterval,
 	}
 }
 
