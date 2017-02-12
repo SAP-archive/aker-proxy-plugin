@@ -11,10 +11,10 @@ import (
 )
 
 type handlerConfig struct {
-	URL                     string `yaml:"url"`
-	ProxyPath               string `yaml:"proxy_path"`
-	PreserveInternalHeaders bool   `yaml:"preserve_internal_headers"`
-	FlushInterval           string `yaml:"flush_interval"`
+	URL                     string        `yaml:"url"`
+	ProxyPath               string        `yaml:"proxy_path"`
+	PreserveInternalHeaders bool          `yaml:"preserve_internal_headers"`
+	FlushInterval           time.Duration `yaml:"flush_interval"`
 }
 
 func NewHandlerFromRawConfig(config []byte) (http.Handler, error) {
@@ -30,8 +30,8 @@ func NewHandlerFromConfig(cfg handlerConfig) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	flushDuration, _ := time.ParseDuration(cfg.FlushInterval)
-	return NewHandler(targetURL, cfg.ProxyPath, cfg.PreserveInternalHeaders, flushDuration), nil
+
+	return NewHandler(targetURL, cfg.ProxyPath, cfg.PreserveInternalHeaders, cfg.FlushInterval), nil
 }
 
 func NewHandler(targetURL *url.URL, proxyPath string, preserveHeaders bool, flushInterval time.Duration) http.Handler {
