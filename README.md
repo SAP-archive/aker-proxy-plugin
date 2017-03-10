@@ -1,4 +1,5 @@
 [![CLA assistant](https://cla-assistant.io/readme/badge/SAP/aker-proxy-plugin)](https://cla-assistant.io/SAP/aker-proxy-plugin)
+[![Travis Build](https://travis-ci.org/SAP/aker-proxy-plugin.svg?branch=master)](https://travis-ci.org/SAP/aker-proxy-plugin)
 
 Aker Proxy Plugin
 =================
